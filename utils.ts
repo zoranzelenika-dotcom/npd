@@ -1,0 +1,11 @@
+export function keyOf(value) { return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+export function makeConcept(product, id) {
+  return { id: 'CPT-' + id, name: product.name, brand: product.brand, category: product.category, group: product.group, claims: product.claims || [], allergens: product.allergens || [], flavours: product.flavours || [], ingredients: product.ingredients || [], list: product.list, source: product.source || 'Market product', status: product.status || 'Draft', risk: product.risk || ((product.allergens || []).length > 2 ? 'Medium' : 'Low'), lastEdited: product.lastEdited || 'Today', duplicateKey: keyOf(product.name) };
+}
+export function matchProduct(product, filters) {
+  const any = (selected, values) => !selected.length || selected.some((value) => values.includes(value));
+  return any(filters['Product Category'], [product.category]) && any(filters['Food Group'], [product.group]) && any(filters['Labelling/Claims'], product.claims) && any(filters.Allergens, product.allergens) && any(filters.Flavour, product.flavours) && any(filters.Ingredient, product.ingredients);
+}
+export function trend(rows, key, factor) { const counts = new Map(); rows.forEach((product) => product[key].forEach((value) => counts.set(value, (counts.get(value) || 0) + 1))); const output = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count], index) => [name, '+' + (count * 7.4 * factor + (10 - index) * 0.4).toFixed(2) + '%', 'up']); return output.length ? output : [['No matching data', '0.0%', 'flat']]; }
+export function priceRows(rows, factor) { const used = new Set(rows.flatMap((product) => product.ingredients)); const base = [['almond','$22.03',3.24],['apple','$1.75',7.57],['barley','$0.65',-25.57],['beef','$20.28',36.42],['citric acid','$1.08',4.4],['garlic','$4.50',12.4],['mozzarella','$3.90',6.2],['paprika','$4.15',2.2],['yeast','$15.30',8.7]]; return (base.filter((row) => used.has(row[0])).length ? base.filter((row) => used.has(row[0])) : base).map(([name, price, growth]) => [name, price, growth * factor]).sort((a, b) => b[2] - a[2]).map(([name, price, growth]) => [name, price, (growth >= 0 ? '+' : '') + growth.toFixed(2) + '%', growth]); }
+export function priceClass(value) { if (value < 0) return 'price-fall'; if (value <= 5) return 'price-warn'; return 'price-risk'; }
