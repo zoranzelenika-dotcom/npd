@@ -325,16 +325,14 @@ export function Risk() {
     const nextDir = active && sort.dir === 'asc' ? 'desc' : 'asc';
 
     return (
-      <th>
-        <button
-          className={'sortHeader ' + (active ? 'sortHeaderActive' : '')}
-          onClick={() => setSort((current) => current.key === key ? { key, dir: current.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })}
-          aria-label={`Sort by ${label} ${nextDir === 'asc' ? 'ascending' : 'descending'}`}
-        >
-          {label}
-          <Icon className="sortIcon" size={13} strokeWidth={2.4} />
-        </button>
-      </th>
+      <button
+        className={'sortHeader ' + (active ? 'sortHeaderActive' : '')}
+        onClick={() => setSort((current) => current.key === key ? { key, dir: current.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })}
+        aria-label={`Sort by ${label} ${nextDir === 'asc' ? 'ascending' : 'descending'}`}
+      >
+        {label}
+        <Icon className="sortIcon" size={13} strokeWidth={2.4} />
+      </button>
     );
   };
 
@@ -353,38 +351,31 @@ export function Risk() {
           </div>
           <button className="reportAction">Export list <Download size={14} /></button>
         </div>
-        <table className="reportTable">
-          <thead>
-            <tr>
-              {head('Report', 'name')}
-              {head('Quarter', 'quarter')}
-              {head('Week', 'week')}
-              {head('Coverage', 'coverage')}
-              {head('Risk', 'risk')}
-              {head('Published', 'published')}
-              {head('Owner', 'owner')}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((report) => (
-              <tr key={report.id} className={openReport?.id === report.id ? 'rowSelected' : ''}>
-                <td>
-                  <button className="conceptName reportName" onClick={() => setOpenReport(report)}>
-                    <Eye size={14} />
-                    <span>{report.name}</span>
-                  </button>
-                  <small>{report.id}</small>
-                </td>
-                <td>{report.quarter}</td>
-                <td>{report.week}</td>
-                <td>{report.coverage}</td>
-                <td><span className={'riskBadge risk' + report.risk}>{report.risk}</span></td>
-                <td>{report.published}</td>
-                <td>{report.owner}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="riskListHeader">
+          {head('Latest first', 'published')}
+          {head('Risk level', 'risk')}
+          {head('Quarter', 'quarter')}
+        </div>
+        <div className="riskList">
+          {rows.map((report) => (
+            <button
+              key={report.id}
+              className={'riskListItem ' + (openReport?.id === report.id ? 'isActive' : '')}
+              onClick={() => setOpenReport(report)}
+            >
+              <div className="riskListMain">
+                <span className="riskListName"><Eye size={14} /> {report.name}</span>
+                <small>{report.id}</small>
+              </div>
+              <div className="riskListMeta">
+                <span>{report.quarter}</span>
+                <span>{report.week}</span>
+                <span>{report.published}</span>
+                <span className={'riskBadge risk' + report.risk}>{report.risk} risk</span>
+              </div>
+            </button>
+          ))}
+        </div>
       </section>
 
       {openReport && <ReportDrawer report={openReport} onClose={() => setOpenReport(null)} />}
